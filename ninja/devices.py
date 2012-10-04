@@ -35,7 +35,7 @@ class Device(Events):
         device.is_sensor
         device.is_actuator
         device.data
-        device.last_fetch
+        device.last_heartbeat
         device.last_read
 
 
@@ -55,14 +55,14 @@ class Device(Events):
         self.is_sensor      = (info.get('is_sensor', None) == 1)
         self.is_actuator    = (info.get('is_actuator', None) == 1)
         self.data           = None
-        self.last_fetch     = None
+        self.last_heartbeat = None
         self.last_read      = None
 
     def heartbeat(self):
         data = self.api.updateDevice(self.guid)
         if data['id'] == 0:
             previous_data       = copy.deepcopy(self.data)
-            self.last_fetch     = datetime.utcnow()
+            self.last_heartbeat = datetime.utcnow()
             self.data           = self._parse(data['data']['DA'])
             last_read           = data['data']['timestamp']
             self.last_read      = datetime.utcfromtimestamp(last_read / 1000)
@@ -81,7 +81,7 @@ class Device(Events):
             'is_sensor',
             'is_actuator',
             'data',
-            'last_fetch',
+            'last_heartbeat',
             'last_read',
         )
         device_dict = {}
