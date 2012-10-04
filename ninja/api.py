@@ -69,7 +69,7 @@ class Watcher(object):
     def start(self, period=10):
         self.active = True
         if not self._devices:
-            raise Exception('watcher does not have any devices')
+            raise Exception('Watcher instance does not have any devices')
 
         while self.active:
             for guid, device in self._devices.items():
