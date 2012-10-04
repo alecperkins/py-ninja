@@ -26,7 +26,7 @@ watcher     = Watcher()
 # Output the temperature to stdio.
 def printTempCelsius(inst, data):
     date = inst.last_read.isoformat()
-    print date + ' - ' + inst.guid + str(data.c)
+    print date + ' - ' + inst.guid + ': ' + str(data.c)
 
 # Bind the output to the heartbeat event.
 device1.onHeartbeat(printTempCelsius)
