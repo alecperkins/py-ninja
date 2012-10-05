@@ -20,7 +20,7 @@ device1     = TemperatureSensor(api, '<DEVICE_1_GUID>')
 device2     = HumiditySensor(api, '<DEVICE_2_GUID>')
 
 # The watcher will provide a single loop for polling all of the devices.
-watcher     = Watcher()
+watcher     = Watcher(device1, device2)
 
 
 # Output the temperature to stdio.
@@ -47,6 +47,4 @@ device2.onHeartbeat(printRelHumidity)
 
 # Watch both devices in the same loop, triggering their heartbeats ever
 # 10 seconds.
-watcher.watch(device1)
-watcher.watch(device2)
 watcher.start(period=10)

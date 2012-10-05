@@ -55,10 +55,12 @@ class NinjaAPI(object):
 
 
 class Watcher(object):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args):
         self._devices = {}
+        for device in args:
+            self.watch(device)
         self.active = False
-        super(Watcher, self).__init__(*args, **kwargs)
+        return super(Watcher, self).__init__()
 
     def watch(self, device):
         self._devices[device.guid] = device
