@@ -103,3 +103,14 @@ class TemperatureSensor(Device):
         return float(self.data)
 
 
+
+class HumiditySensor(Device):
+    pass
+
+
+
+class LightSensor(Device):
+    pass
+
+
+
