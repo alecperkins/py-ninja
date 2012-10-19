@@ -1,8 +1,10 @@
-from exceptions import Exception, ValueError
-
 import json
 import requests
 import time
+
+from datetime   import datetime
+from exceptions import Exception, ValueError
+
 
 
 class NinjaAPIError(Exception):
@@ -28,7 +30,7 @@ class NinjaAPI(object):
         self.access_token = args[0]
 
 
-    def _makeRequest(self, url, binary=False):
+    def _makeGETRequest(self, url, binary=False):
 
         params = {
             'user_access_token': self.access_token,
@@ -49,8 +51,9 @@ class NinjaAPI(object):
             raise NinjaAPIError('Got status code %s, expected 200' % (res.status_code,))
 
 
-    def updateDevice(self, device_guid):
-        return self._makeRequest(self.DEVICE_ROOT_URL + '/' + device_guid + '/heartbeat')
+
+    def getDeviceHeartbeat(self, device_guid):
+        return self._makeGETRequest(self.DEVICE_ROOT_URL + '/' + device_guid + '/heartbeat')
 
 
 
@@ -68,15 +71,19 @@ class Watcher(object):
     def unwatch(self, device):
         self._devices.pop(device.guid)
 
-    def start(self, period=10):
+    def start(self, period=10, duration=float('inf')):
         self.active = True
+        self._elapsed = 0
+
         if not self._devices:
             raise Exception('Watcher instance does not have any devices')
 
-        while self.active:
+        while self._elapsed < duration:
+            self._last_poll = datetime.utcnow()
             for guid, device in self._devices.items():
                 device.heartbeat()
-            time.sleep(period)
+            self._elapsed += period
+            if duration - self._elapsed > period:
+                time.sleep(period)
 
-    def quit(self):
         self.active = False

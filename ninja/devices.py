@@ -40,7 +40,7 @@ class Device(Events):
         self.last_read      = None
 
     def heartbeat(self):
-        data = self.api.updateDevice(self.guid)
+        data = self.api.getDeviceHeartbeat(self.guid)
         if data['id'] == 0:
             previous_data       = copy.deepcopy(self.data)
             self.last_heartbeat = datetime.utcnow()
