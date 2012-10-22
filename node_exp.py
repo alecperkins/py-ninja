@@ -39,7 +39,7 @@ Thoughts:
 """
 
 
-from ninja.nodes import Echo, Counter, Channel, Static
+from ninja.nodes import Echo, Counter, Channel, Emit
 
 
 print "\n\n\t**\tConnect input to input (fails)"
@@ -84,13 +84,13 @@ counter.startCounter(10, delay=0.1)
 
 
 
-print "\n\n\t**\tConnect a static node"
+print "\n\n\t**\tConnect an emitter node"
 channel = Channel()
-static = Static('some data')
-static.o.connect(channel.i)
+emitter = Emit('some data')
+emitter.o.connect(channel.i)
 channel.o.connect(*[Echo().i for x in range(10)])
 for i in range(10):
-    static.emitData()
+    emitter.emitData()
 
 
 
@@ -119,5 +119,3 @@ counter = Counter()
 counter.o.connect(channel.i)
 channel.o.connect(*[Echo().i for x in range(10)])
 counter.startCounter(10, delay=0.1)
-
-

@@ -50,10 +50,29 @@ class NinjaAPI(object):
         else:
             raise NinjaAPIError('Got status code %s, expected 200' % (res.status_code,))
 
+    def _makePUTRequest(self, url, data):
+        params = {
+            'user_access_token': self.access_token,
+        }
+        res = requests.put(url, params=params, data=data)   
+
+        if res.status_code == 200:
+            try:
+                content = json.loads(res.content)
+            except ValueError:
+                raise NinjaAPIError("Did not get a JSON object (check device id)")
+            return content
+        else:
+            raise NinjaAPIError('Got status code %s, expected 200' % (res.status_code,))
 
 
     def getDeviceHeartbeat(self, device_guid):
         return self._makeGETRequest(self.DEVICE_ROOT_URL + '/' + device_guid + '/heartbeat')
+
+
+    def getDeviceURL(self, device_guid):
+        return self.DEVICE_ROOT_URL + '/' + device_guid
+
 
 
 

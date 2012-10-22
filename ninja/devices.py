@@ -114,3 +114,15 @@ class LightSensor(Device):
 
 
 
+class Accelerometer(Device):
+    pass
+
+
+class RGBLED(Device):
+    def setColor(self, color):
+        # _makePUTRequest(self, url, data):
+        data = {
+            'DA': color
+        }
+        self.api._makePUTRequest(self.api.getDeviceURL(self.guid), data)
+        return

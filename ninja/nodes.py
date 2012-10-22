@@ -66,7 +66,8 @@ class HasOutput(object):
         raise NotImplementedError('')
 
 class Node(object):
-    def __init__(self):
+    def __init__(self, label=None):
+        self.label = label
         self.id = str(uuid4())
         if hasattr(self, 'setupOutput'):
             self.setupOutput()
@@ -82,15 +83,18 @@ class Echo(Node, HasInput):
     Public (I): prints the data it receives to stdout.
     """
     def receiveData(self, data):
-        print self.id, 'received', data
+        label = self.label
+        if not label:
+            label = 'Echo ' + self.id.split('-')[0]
+        print label,':', data
 
 
-class Static(Node, HasOutput):
+class Emit(Node, HasOutput):
     """
     Public (O): emits a static value, or the return value of a callable.
     """
     def __init__(self, data_to_emit):
-        super(Static, self).__init__()
+        super(Emit, self).__init__()
         self._data_to_emit = data_to_emit
 
     def emitData(self):
@@ -108,8 +112,6 @@ class Counter(Node, HasOutput):
     """
     def emitData(self):
         for i in range(self._count_to):
-            print
-            print self.id, 'emit', i
             if self._data_to_emit:
                 if hasattr(self._data_to_emit, '__call__'):
                     d = self._data_to_emit(i)
@@ -137,13 +139,11 @@ class Channel(Node, HasInput, HasOutput):
     given a transform function, which will be called on the data every time.
     """
     def receiveData(self, data):
-        print 'Channel.receiveData', data
         if hasattr(self, '_transform'):
             data = self._transform(data)
         self.o.emit(data)
 
     def setTransform(self, fn):
-        print 'setting transform', fn
         self._transform = fn
 
     def clearTransform(self, fn):
