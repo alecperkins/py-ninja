@@ -35,15 +35,21 @@ class NodeConnector(object):
 
 
 class Input(NodeConnector):
-    def receive(self, data):
+    def __call__(self, data):
         self.node.receiveData(data)
+        self.node.last_data = data
+        return self
 
 
 
 class Output(NodeConnector):
+    def __call__(self):
+        return self.node.last_data
+
     def emit(self, data):
+        self.node.last_data = data
         for input_id, input in self._connected.items():
-            input.receive(data)
+            input(data)
 
 
 
@@ -66,7 +72,7 @@ class HasOutput(object):
         raise NotImplementedError('')
 
 class Node(object):
-    def __init__(self, label=None):
+    def __init__(self, label=None, *args, **kwargs):
         self.label = label
         self.id = str(uuid4())
         if hasattr(self, 'setupOutput'):
@@ -93,8 +99,8 @@ class Emit(Node, HasOutput):
     """
     Public (O): emits a static value, or the return value of a callable.
     """
-    def __init__(self, data_to_emit):
-        super(Emit, self).__init__()
+    def __init__(self, data_to_emit, *args, **kwargs):
+        super(Emit, self).__init__(*args, **kwargs)
         self._data_to_emit = data_to_emit
 
     def emitData(self):
@@ -138,8 +144,12 @@ class Channel(Node, HasInput, HasOutput):
     Useful for aggregating inputs and/or outputs into a single point. Can be
     given a transform function, which will be called on the data every time.
     """
+    def __init__(self, *args, **kwargs):
+        super(Channel, self).__init__(*args, **kwargs)
+        self._transform = kwargs.get('transform', None)
+
     def receiveData(self, data):
-        if hasattr(self, '_transform'):
+        if self._transform:
             data = self._transform(data)
         self.o.emit(data)
 
@@ -149,3 +159,26 @@ class Channel(Node, HasInput, HasOutput):
     def clearTransform(self, fn):
         self._transform = None
 
+import csv
+class CSVWriter(Node, HasInput):
+    def __init__(self, *args, **kwargs):
+        super(CSVWriter, self).__init__(*args, **kwargs)
+        self._file = kwargs.get('file', None)
+        if not self._file:
+            raise ValueError('file not specified')
+
+        self._write_mode = kwargs.get('mode', 'a')
+
+        self._headers = kwargs.get('headers', None)
+        if self._headers:
+            self._writeToFile(self._headers, mode='w')
+
+    def _writeToFile(self, data, mode=None):
+        if not mode:
+            mode = self._write_mode
+        with open(self._file, mode) as f:
+            writer = csv.writer(f)
+            writer.writerow(data)
+
+    def receiveData(self, data):
+        self._writeToFile(data)

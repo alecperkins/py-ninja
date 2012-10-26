@@ -7,7 +7,7 @@ connected to one or more of the opposite type of connector.
 
 Nodes:
 
-* Devices
+* Devices (& simulated devices)
 * Logic
 * Virtual devices (eg HTTP, ZMQ)
 * Data storage (file, csv, SQL, Mongo, Redis)
@@ -39,7 +39,15 @@ Thoughts:
 """
 
 
-from ninja.nodes import Echo, Counter, Channel, Emit
+# channel.o.connect(echo)
+# latest_data = channel.o()
+# channel.i(new_data)
+
+
+
+
+
+from ninja.nodes import Echo, Counter, Channel, Emit, CSVWriter
 
 
 print "\n\n\t**\tConnect input to input (fails)"
@@ -119,3 +127,25 @@ counter = Counter()
 counter.o.connect(channel.i)
 channel.o.connect(*[Echo().i for x in range(10)])
 counter.startCounter(10, delay=0.1)
+
+
+print "\n\n\t**\tRead & Write"
+channel = Channel()
+counter = Counter()
+counter.startCounter(5, delay=0.1)
+channel.o.connect(*[Echo().i for x in range(10)])
+print 'Last read:', counter.o()
+print 'Write:'
+channel.i('SOME DATA')
+
+
+import random
+print "\n\n\t**\tWrite to file"
+counter = Counter()
+counter.o.connect(Echo().i)
+csvnode = CSVWriter(file='x.csv', headers=['a','b','c','d'])
+counter.o.connect(csvnode.i)
+counter.startCounter(data=lambda x: [x*random.random(),x+1*random.random(),x+2*random.random(),x+3*random.random()])
+
+
+
