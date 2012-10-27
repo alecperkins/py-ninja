@@ -47,7 +47,7 @@ Thoughts:
 
 
 
-from ninja.nodes import Echo, Counter, Channel, Emit, CSVWriter
+from ninja.nodes import Echo, Counter, Channel, Emit, CSVWriter, JSONWriter, If, Buffer
 
 
 print "\n\n\t**\tConnect input to input (fails)"
@@ -140,12 +140,46 @@ channel.i('SOME DATA')
 
 
 import random
-print "\n\n\t**\tWrite to file"
+print "\n\n\t**\tWrite to csv file"
 counter = Counter()
 counter.o.connect(Echo().i)
 csvnode = CSVWriter(file='x.csv', headers=['a','b','c','d'])
 counter.o.connect(csvnode.i)
 counter.startCounter(data=lambda x: [x*random.random(),x+1*random.random(),x+2*random.random(),x+3*random.random()])
+
+
+
+print "\n\n\t**\tWrite to json file"
+counter = Counter()
+counter.o.connect(Echo().i)
+jsonnode = JSONWriter()
+counter.o.connect(jsonnode.i)
+counter.startCounter(data=lambda x: { 'file': str(x) + '.json', 'data': { 'a': [x*random.random(),x+1*random.random(),x+2*random.random(),x+3*random.random()] } })
+
+
+
+print "\n\n\t**\tIf"
+counter = Counter()
+def do_test(data):
+    return data % 2 == 0
+if_node = If(test=lambda x: x % 2 == 0)
+if_node.o.connect(Echo().i)
+if_node.fail.connect(Echo('Fail', message='x % 2').i)
+counter.o.connect(Echo().i, if_node.i)
+counter.startCounter()
+
+
+
+
+
+print "\n\n\t**\tUse a buffer"
+buffer_node = Buffer()
+buffer_node.o.connect(Echo(message='buffered').i)
+counter = Counter()
+counter.o.connect(buffer_node.i)
+counter.o.connect(Echo().i)
+counter.startCounter(10, delay=1)
+buffer_node.flush()
 
 
 

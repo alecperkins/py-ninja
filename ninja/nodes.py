@@ -159,6 +159,24 @@ class Channel(Node, HasInput, HasOutput):
     def clearTransform(self, fn):
         self._transform = None
 
+
+
+class Buffer(Channel):
+    def __init__(self, *args, **kwargs):
+        super(Buffer, self).__init__(*args, **kwargs)
+        self._queue = []
+
+    def receiveData(self, data):
+        if self._transform:
+            data = self._transform(data)
+        self._queue.append(data)
+
+    def flush(self):
+        for data in self._queue:
+            self.o.emit(data)
+
+
+
 import csv
 class CSVWriter(Node, HasInput):
     def __init__(self, *args, **kwargs):
@@ -182,3 +200,37 @@ class CSVWriter(Node, HasInput):
 
     def receiveData(self, data):
         self._writeToFile(data)
+
+# {
+#     'file': 'filename.json',
+#     'data': {}
+# }
+import json
+class JSONWriter(Node, HasInput):
+    def _writeToFile(self, file_name, data_to_write):
+        file(file_name, 'w').write(json.dumps(data_to_write))
+
+    def receiveData(self, data):
+        file_name       = data.get('file')
+        data_to_write   = data.get('data')
+        if not file_name:
+            raise ValueError('file not specified')
+        self._writeToFile(file_name, data_to_write)
+class If(Node, HasInput, HasOutput):
+    def __init__(self, *args, **kwargs):
+        super(If, self).__init__(*args, **kwargs)
+        self._test = kwargs.get('test')
+        if not self._test:
+            raise ValueError('test not specified')
+        elif not hasattr(self._test, '__call__'):
+            raise ValueError('test must be a callable')
+
+        self.attachConnector('fail', Output)
+
+
+    def receiveData(self, data):
+        if self._test(data):
+            self.o.emit(data)
+        else:
+            self.fail.emit(data)
+
