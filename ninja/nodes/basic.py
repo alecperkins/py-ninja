@@ -131,7 +131,7 @@ class Buffer(Channel):
         self._queue.append(data)
 
         # `keep` and `flush_at` are exclusive, so only one of these will happen, if any.
-        if len(self._queue) > self._flush_at:
+        if len(self._queue) >= self._flush_at:
             self.flush()
         if len(self._queue) > self._keep:
             self._queue = self._queue[1:]
@@ -140,3 +140,4 @@ class Buffer(Channel):
     def flush(self):
         for data in self._queue:
             self.o.emit(data)
+        self._queue = []
