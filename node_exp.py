@@ -47,7 +47,7 @@ Thoughts:
 
 
 
-from ninja.nodes import Echo, Counter, Channel, Emit, CSVWriter, JSONWriter, If, Buffer
+from ninja.nodes import Echo, Counter, Channel, Source, CSVWriter, JSONWriter, If, Buffer, Sink
 
 
 print "\n\n\t**\tConnect input to input (fails)"
@@ -92,13 +92,23 @@ counter.startCounter(10, delay=0.1)
 
 
 
-print "\n\n\t**\tConnect an emitter node"
+print "\n\n\t**\tConnect a source node"
 channel = Channel()
-emitter = Emit('some data')
-emitter.o.connect(channel.i)
+source = Source('some data')
+source.o.connect(channel.i)
 channel.o.connect(*[Echo().i for x in range(10)])
 for i in range(10):
-    emitter.emitData()
+    source.emitData()
+
+
+print "\n\n\t**\tConnect a sink node"
+counter = Counter()
+def printData(data):
+    print 'sink received', data
+sink = Sink(on_receive=printData)
+counter.o.connect(sink.i)
+counter.startCounter()
+
 
 
 
@@ -135,7 +145,7 @@ counter = Counter()
 counter.startCounter(5, delay=0.1)
 channel.o.connect(*[Echo().i for x in range(10)])
 print 'Last read:', counter.o()
-print 'Write:'
+print 'Write: "SOME DATA"'
 channel.i('SOME DATA')
 
 
@@ -167,8 +177,6 @@ if_node.o.connect(Echo().i)
 if_node.fail.connect(Echo('Fail', message='x % 2').i)
 counter.o.connect(Echo().i, if_node.i)
 counter.startCounter()
-
-
 
 
 
