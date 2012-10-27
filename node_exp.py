@@ -47,7 +47,7 @@ Thoughts:
 
 
 
-from ninja.nodes import Echo, Counter, Channel, Source, CSVWriter, JSONWriter, If, Buffer, Sink
+from ninja.nodes import Echo, Counter, Channel, Source, CSVWriter, JSONWriter, If, Buffer, Sink, HTTPReader
 
 
 print "\n\n\t**\tConnect input to input (fails)"
@@ -58,6 +58,13 @@ try:
 except Exception as e:
     print e
 
+print "\n\n\t**\tConnect output to output (fails)"
+channel = Channel()
+counter = Counter()
+try:
+    channel.o.connect(counter.o)
+except Exception as e:
+    print e
 
 
 print "\n\n\t**\tConnect input to output"
@@ -186,8 +193,40 @@ buffer_node.o.connect(Echo(message='buffered').i)
 counter = Counter()
 counter.o.connect(buffer_node.i)
 counter.o.connect(Echo().i)
+counter.startCounter(10, delay=0.3)
+buffer_node.flush()
+
+
+
+print "\n\n\t**\tSet a flush_at threshold on the buffer"
+buffer_node = Buffer(flush_at=5)
+buffer_node.o.connect(Echo(message='buffered').i)
+counter = Counter()
+counter.o.connect(buffer_node.i)
+counter.o.connect(Echo().i)
+counter.startCounter(15, delay=0.3)
+buffer_node.flush()
+
+
+print "\n\n\t**\tSet a keep limit on the buffer"
+buffer_node = Buffer(keep=5)
+buffer_node.o.connect(Echo(message='buffered').i)
+counter = Counter()
+counter.o.connect(buffer_node.i)
+counter.o.connect(Echo().i)
 counter.startCounter(10, delay=1)
 buffer_node.flush()
 
+
+
+
+import json
+print "\n\n\t**\tHTTPReader"
+get = HTTPReader(url='http://openweathermap.org/data/station/2121?type=json')
+channel = Channel()
+channel.setTransform(lambda x: json.loads(x))
+channel.o.connect(Echo().i)
+get.o.connect(Echo().i, channel.i)
+get.emitData()
 
 
