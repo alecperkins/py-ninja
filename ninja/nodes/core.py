@@ -85,11 +85,15 @@ class Node(object):
     def __init__(self, label=None, *args, **kwargs):
         self.label = label
         self.id = str(uuid4())
-        if hasattr(self, 'setupOutput'):
+        if self.hasOutput():
             self.setupOutput()
-        if hasattr(self, 'setupInput'):
+        if self.hasInput():
             self.setupInput()
 
+    def hasOutput(self):
+        return hasattr(self, 'setupOutput')
 
+    def hasInput(self):
+        return hasattr(self, 'setupInput')
 
 

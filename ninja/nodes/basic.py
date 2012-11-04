@@ -136,8 +136,9 @@ class Buffer(Channel):
         if len(self._queue) > self._keep:
             self._queue = self._queue[1:]
 
-
     def flush(self):
         for data in self._queue:
             self.o.emit(data)
         self._queue = []
+
+
