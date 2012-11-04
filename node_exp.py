@@ -202,8 +202,8 @@ print "\n\n\t**\tSet a flush_at threshold on the buffer"
 buffer_node = Buffer(flush_at=5)
 buffer_node.o.connect(Echo(message='buffered').i)
 counter = Counter()
-counter.o.connect(buffer_node.i)
 counter.o.connect(Echo().i)
+counter.o.connect(buffer_node.i)
 counter.startCounter(15, delay=0.3)
 buffer_node.flush()
 
@@ -212,8 +212,8 @@ print "\n\n\t**\tSet a keep limit on the buffer"
 buffer_node = Buffer(keep=5)
 buffer_node.o.connect(Echo(message='buffered').i)
 counter = Counter()
-counter.o.connect(buffer_node.i)
 counter.o.connect(Echo().i)
+counter.o.connect(buffer_node.i)
 counter.startCounter(10, delay=1)
 buffer_node.flush()
 
