@@ -14,7 +14,7 @@ class Echo(Node, HasInput):
     def setMessage(self, message):
         self._message = message
 
-    def receiveData(self, data):
+    def receiveData(self, data, from_id):
         label = self.label
         if not label:
             label = 'Echo ' + self.id.split('-')[0]
@@ -47,7 +47,7 @@ class Sink(Node, HasInput):
         if not self._onReceive:
             raise ValueError('on_receive must be specified')
 
-    def receiveData(self, data):
+    def receiveData(self, data, from_id):
         self._onReceive(data)
 
 
@@ -87,11 +87,8 @@ class Channel(Node, HasInput, HasOutput):
     def __init__(self, *args, **kwargs):
         super(Channel, self).__init__(*args, **kwargs)
         self._transform = kwargs.get('transform', None)
-        self._buffer = kwargs.get('buffer', False)
-        if self._buffer:
-            self._queue = []
 
-    def receiveData(self, data):
+    def receiveData(self, data, from_id):
         if self._transform:
             data = self._transform(data)
         self.o.emit(data)
@@ -125,7 +122,7 @@ class Buffer(Channel):
         else:
             self._flush_at = float('inf')
 
-    def receiveData(self, data):
+    def receiveData(self, data, from_id):
         if self._transform:
             data = self._transform(data)
         self._queue.append(data)
@@ -140,5 +137,7 @@ class Buffer(Channel):
         for data in self._queue:
             self.o.emit(data)
         self._queue = []
+
+
 
 

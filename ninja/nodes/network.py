@@ -40,4 +40,4 @@ class HTTPReader(Node, HasOutput):
 
     def emitData(self):
         data = self._sendRequest()
-        self.o.emit(data)
+        self.o.emit(self.id, data)

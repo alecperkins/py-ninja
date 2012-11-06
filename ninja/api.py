@@ -74,14 +74,14 @@ class NinjaAPI(object):
         return self.DEVICE_ROOT_URL + '/' + device_guid
 
 
-
-
 class Watcher(object):
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         self._devices = {}
         for device in args:
             self.watch(device)
         self.active = False
+        self._post_cycle = kwargs.get('post_cycle')
+        self._pre_cycle = kwargs.get('pre_cycle')
         return super(Watcher, self).__init__()
 
     def watch(self, device):
@@ -90,7 +90,8 @@ class Watcher(object):
     def unwatch(self, device):
         self._devices.pop(device.guid)
 
-    def start(self, period=10, duration=float('inf')):
+
+    def start(self, period=10, duration=float('inf'), silent=False):
         self.active = True
         self._elapsed = 0
 
@@ -98,11 +99,21 @@ class Watcher(object):
             raise Exception('Watcher instance does not have any devices')
 
         while self._elapsed < duration:
+            if self._pre_cycle:
+                self._pre_cycle()
+
             self._last_poll = datetime.utcnow()
             for guid, device in self._devices.items():
-                device.heartbeat()
+                # TODO: This is the point to geventify. Heartbeats need to be made async.
+                device.heartbeat(silent=silent)
             self._elapsed += period
+
+            if self._post_cycle:
+                self._post_cycle()
+
             if duration - self._elapsed > period:
                 time.sleep(period)
 
         self.active = False
+
+

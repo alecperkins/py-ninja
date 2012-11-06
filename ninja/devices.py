@@ -39,7 +39,7 @@ class Device(Events):
         self.last_heartbeat = None
         self.last_read      = None
 
-    def heartbeat(self):
+    def heartbeat(self, silent=False):
         data = self.api.getDeviceHeartbeat(self.guid)
         if data['id'] == 0:
             previous_data       = copy.deepcopy(self.data)
@@ -48,9 +48,11 @@ class Device(Events):
             last_read           = data['data']['timestamp']
             self.last_read      = datetime.utcfromtimestamp(last_read / 1000)
 
-            self._fire(Device.Events.HEARTBEAT, self.data)
-            if self.data != previous_data:
-                self._fire(Device.Events.CHANGE, self.data, previous_data)
+            # Fire the events unless suppressed.
+            if not silent:
+                self._fire(Device.Events.HEARTBEAT, self.data)
+                if self.data != previous_data:
+                    self._fire(Device.Events.CHANGE, self.data, previous_data)
 
         return self.last_read, self.data
 

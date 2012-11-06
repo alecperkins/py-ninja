@@ -1,6 +1,5 @@
 from .core  import Node, HasInput, HasOutput
-from ninja.devices  import RGBLED, Accelerometer
-
+from ninja.devices  import RGBLED, Accelerometer, TemperatureSensor
 
 
 class DeviceNode(Node):    
@@ -18,18 +17,33 @@ class DeviceNode(Node):
     def device_class(self):
         raise NotImplementedError('')
 
+    def emitData(self):
+        if self.hasOutput():
+            d = self.device
+            self.o.emit({
+                'guid'      : self.device.guid,
+                'last_read' : self.device.last_read,
+                'data'      : self.device.data,
+            })
+            
+
+
+
 
 
 class LEDNode(DeviceNode, HasInput):
     device_class = RGBLED
-    def receiveData(self, data):
+    def receiveData(self, data, from_id):
         self.device.setColor(data)
 
 
 
 class AccelerometerNode(DeviceNode, HasOutput):
     device_class = Accelerometer
+
     def emitData(self):
-        self.o.emit((self.device.last_read, self.device.data))
+        super(AccelerometerNode, self).emitData()
 
 
+class TemperatureNode(DeviceNode, HasOutput):
+    device_class = TemperatureSensor

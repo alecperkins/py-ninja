@@ -30,7 +30,7 @@ class CSVWriter(Node, HasInput):
             writer = csv.writer(f)
             writer.writerow(data)
 
-    def receiveData(self, data):
+    def receiveData(self, data, from_id):
         self._writeToFile(data)
 
 
@@ -43,7 +43,7 @@ class JSONWriter(Node, HasInput):
     def _writeToFile(self, file_name, data_to_write):
         file(file_name, 'w').write(json.dumps(data_to_write))
 
-    def receiveData(self, data):
+    def receiveData(self, data, from_id):
         file_name       = data.get('file')
         data_to_write   = data.get('data')
         if not file_name:
