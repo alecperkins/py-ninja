@@ -5,6 +5,8 @@ import time
 from datetime   import datetime
 from exceptions import Exception, ValueError
 
+from .devices import TYPE_MAP, Device
+
 
 
 class NinjaAPIError(Exception): pass
@@ -70,7 +72,6 @@ class NinjaAPI(object):
         return self.DEVICE_ROOT_URL + '/' + device_guid
 
     def getDevices(self):
-        from devices import TYPE_MAP, Device
         response = self._makeGETRequest(self.DEVICES_URL)
         devices = []
         for guid, device_info in response['data'].items():
@@ -78,6 +79,26 @@ class NinjaAPI(object):
             device = device_class(self, guid, device_info)
             devices.append(device)
         return devices
+
+    def getDevice(self, guid):
+        # Need to get the whole device list because the API is not so great.
+        response = self._makeGETRequest(self.DEVICES_URL)
+        device_info = response['data'][guid]
+        device_class = TYPE_MAP.get(device_info.get('device_type'), Device)
+        return device_class(self, guid, device_info)
+
+    def getUser(self):
+        user_info = self._makeGETRequest(self.USER_URL)
+        return User(user_info)
+
+
+
+class User(object):
+    def __init__(self, user_info):
+        self.id = user_info.get('id')
+        self.name = user_info.get('name')
+        self.email = user_info.get('email')
+        self.pusher_channel = user_info.get('pusherChannel')
 
 
 
