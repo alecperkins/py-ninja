@@ -1,6 +1,6 @@
 from decimal        import Decimal
 from exceptions     import ValueError
-
+import colorsys
 
 
 class Temperature(object):
@@ -198,13 +198,35 @@ class Temperature(object):
     def __hex__(self):
         return hex(self.k)
 
-import colorsys
+
+def _passThrough(*args):
+    return args
+
+def _RGBToHex(r, g, b):
+    data = []
+    for d in [r, g, b]:
+        d = hex(d).split('x')[1].upper()
+        if len(d) < 2:
+            d = '0' + d
+        data.append(d)
+    return ''.join(data)
+
+def _hexToRGB(hex_str):
+    r = int(hex_str[0:2], 16)
+    g = int(hex_str[2:4], 16)
+    b = int(hex_str[4:6], 16)
+    return (r, g, b)
+
 class Color(object):
 
     def __init__(self, *args):
         if len(args) == 1:
             if hasattr(args[0], 'split'):
-                r, g, b = args[0].split(',')
+                value = args[0].split(',')
+                if len(value) == 3:
+                    r, g, b = args[0].split(',')
+                else:
+                    r, g, b = _hexToRGB(value[0])
             else:
                 r, g, b = args[0]
             r = int(r)
@@ -222,12 +244,10 @@ class Color(object):
         self.g = g
         self.b = b
 
-    def _pass_through(*args):
-        return args
-
     _converters = {
         'hls': (colorsys.rgb_to_hls, colorsys.hls_to_rgb),
-        'rgb': (_pass_through, _pass_through)
+        'rgb': (_passThrough, _passThrough),
+        'hex': (_RGBToHex, _hexToRGB),
     }
 
     def __getattr__(self, name):
@@ -238,8 +258,7 @@ class Color(object):
 
     def __setattr__(self, name, value):
         if name in self._converters:
-            value = Color(value)
-            self.r, self.g, self.b = self._converters[1](*Color.rgb)
+            self.r, self.g, self.b = self._converters[1](value)
         else:
             object.__setattr__(self, name, value)
 
@@ -276,5 +295,6 @@ _color_constants = {
     'PURPLE'  : ( 255 , 255 , 0   ),
     'BLACK'   : ( 0   , 0   , 0   ),
 }
+
 for name, rgb in _color_constants.items():
     Color._add_color_constant(name, rgb)

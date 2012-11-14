@@ -46,6 +46,6 @@ class TemperatureNode(DeviceNode, HasOutput):
     device_class = TemperatureSensor
 
 
-class ButtonNode(DeviceNode, HasOutput)
+class ButtonNode(DeviceNode, HasOutput):
     device_class = Button
 

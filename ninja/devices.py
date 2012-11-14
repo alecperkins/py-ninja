@@ -140,13 +140,17 @@ class Button(Device):
 
 from units import Color
 class RGBLED(Device):
+    def __init__(self, *args, **kwargs):
+        super(RGBLED, self).__init__(*args, **kwargs)
+        self._last_color = Color.BLACK
+
     def setColor(self, *args):
         if not self._last_color:
             self._last_color = Color.WHITE
 
         color = Color(*args)
         data = {
-            'DA': str(color)
+            'DA': color.hex
         }
         self.api._makePUTRequest(self.api.getDeviceURL(self.guid), data)
         return
