@@ -39,7 +39,7 @@ class Device(Events):
         self.last_read      = None
 
     def __str__(self):
-        return '{class_name}("{device_name}")'.format(
+        return '{device_name} ({class_name})'.format(
             class_name=self.__class__.__name__,
             device_name=self.name,
         )
@@ -80,7 +80,11 @@ class Device(Events):
             device_dict[field] = getattr(self, field)
 
         if for_json:
-            device_dict['data'] = self._dataToJSON(device_dict['data'])
+            device_dict['data'] = self._dataToJSON()
+            if self.last_read:
+                device_dict['last_read'] = self.last_read.isoformat()
+            if self.last_heartbeat:
+                device_dict['last_heartbeat'] = self.last_heartbeat.isoformat()
         return device_dict
 
     # Shortcut for on('heartbeat', callback).
