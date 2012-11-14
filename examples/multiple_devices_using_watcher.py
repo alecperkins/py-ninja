@@ -3,6 +3,8 @@ An example showing how to use the Watcher to track multiple devices in one
 process.
 """
 
+from _examples import *
+
 from ninja.api      import NinjaAPI, Watcher
 from ninja.devices  import TemperatureSensor, HumiditySensor
 
@@ -13,11 +15,10 @@ from datetime       import datetime
 # Set up the NinjaAPI and Device wrappers:
 
 # Access token from https://a.ninja.is/you#apiTab
-api         = NinjaAPI('<YOUR_ACCESS_TOKEN>')
+api         = NinjaAPI(settings.ACCESS_TOKEN)
 
-# Device GUID can be found using https://api.ninja.is/rest/v0/devices/?access_token=<YOUR_ACCESS_TOKEN>
-device1     = TemperatureSensor(api, '<DEVICE_1_GUID>')
-device2     = HumiditySensor(api, '<DEVICE_2_GUID>')
+device1     = TemperatureSensor(api, settings.TEMP_ID)
+device2     = HumiditySensor(api, settings.HUMIDITY_ID)
 
 # The watcher will provide a single loop for polling all of the devices.
 watcher     = Watcher(device1, device2)

@@ -1,5 +1,5 @@
 from .core  import Node, HasInput, HasOutput
-from ninja.devices  import RGBLED, Accelerometer, TemperatureSensor
+from ninja.devices  import Button, RGBLED, Accelerometer, TemperatureSensor
 
 
 class DeviceNode(Node):    
@@ -44,3 +44,8 @@ class AccelerometerNode(DeviceNode, HasOutput):
 
 class TemperatureNode(DeviceNode, HasOutput):
     device_class = TemperatureSensor
+
+
+class ButtonNode(DeviceNode, HasOutput)
+    device_class = Button
+

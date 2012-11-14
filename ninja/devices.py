@@ -119,10 +119,30 @@ class Accelerometer(Device):
     pass
 
 
+class Button(Device):
+    def isPushed(self):
+        return self.data == 0
+
+
+
+from units import Color
 class RGBLED(Device):
-    def setColor(self, color):
+    def setColor(self, *args):
+        if not self._last_color:
+            self._last_color = Color.WHITE
+
+        color = Color(*args)
         data = {
-            'DA': color
+            'DA': str(color)
         }
         self.api._makePUTRequest(self.api.getDeviceURL(self.guid), data)
         return
+
+    def turnOn(self): # turns on to last color
+        self.setColor(self._last_color)
+
+    def turnOff(self):
+        self._last_color = self.data
+        self.setColor(Color.BLACK)
+
+

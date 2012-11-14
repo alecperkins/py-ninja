@@ -197,3 +197,84 @@ class Temperature(object):
 
     def __hex__(self):
         return hex(self.k)
+
+import colorsys
+class Color(object):
+
+    def __init__(self, *args):
+        if len(args) == 1:
+            if hasattr(args[0], 'split'):
+                r, g, b = args[0].split(',')
+            else:
+                r, g, b = args[0]
+            r = int(r)
+            g = int(g)
+            b = int(b)
+        elif len(args) == 3:
+            r = args[0]
+            g = args[1]
+            b = args[2]
+        else:
+            r = 0
+            g = 0
+            b = 0
+        self.r = r
+        self.g = g
+        self.b = b
+
+    def _pass_through(*args):
+        return args
+
+    _converters = {
+        'hls': (colorsys.rgb_to_hls, colorsys.hls_to_rgb),
+        'rgb': (_pass_through, _pass_through)
+    }
+
+    def __getattr__(self, name):
+        if name in self._converters:
+            return self._converters[name][0](self.r, self.g, self.b)
+        else:
+            return object.__getattribute__(self, name)
+
+    def __setattr__(self, name, value):
+        if name in self._converters:
+            value = Color(value)
+            self.r, self.g, self.b = self._converters[1](*Color.rgb)
+        else:
+            object.__setattr__(self, name, value)
+
+    def __repr__(self):
+        return 'Color%s' % (self.rgb,)
+
+    def __str__(self):
+        return ','.join([str(v) for v in self.rgb])
+
+    def __iter__(self):
+        return self.rgb.__iter__()
+
+    def __len__(self):
+        return len(self.rgb)
+
+    def __contains__(self, v):
+        return v in self.rgb
+
+    def __getitem__(self, v):
+        return self.rgb[v]
+
+    @classmethod
+    def _add_color_constant(cls, name, val):
+        val = cls(val)
+        setattr(cls, name, val)
+
+_color_constants = {
+    'WHITE'   : ( 255 , 255 , 255 ),
+    'RED'     : ( 255 , 0   , 0   ),
+    'GREEN'   : ( 0   , 255 , 0   ),
+    'BLUE'    : ( 0   , 0   , 255 ),
+    'CYAN'    : ( 0   , 255 , 255 ),
+    'YELLOW'  : ( 255 , 0   , 255 ),
+    'PURPLE'  : ( 255 , 255 , 0   ),
+    'BLACK'   : ( 0   , 0   , 0   ),
+}
+for name, rgb in _color_constants.items():
+    Color._add_color_constant(name, rgb)

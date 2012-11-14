@@ -42,21 +42,7 @@ Don't worry, it's not as crazy as it looks. Not including the transform
 functions, it's barely more than a dozen lines of code.
 """
 
-# Add the parent directory to the PATH so the examples can be run without the
-# ninja package needing to be installed.
-import sys; sys.path.append('../')
-
-try:
-    import secrets
-except ImportError as e:
-    print e
-    print """
-        You need to add your access token and device GUIDs to a `secrets.py`
-        file in this directory. See `secrets.py.example`.
-    """
-    sys.exit()
-
-
+from _examples import *
 
 from datetime       import datetime
 
@@ -125,7 +111,7 @@ channel.setTransform(toRGB)
 #        [9]
 temp_and_accel_logger = CSVWriter(
     file='temp_and_accel_log.csv',
-    headers=['date','temp (k)','accel (XX,YY,ZZ)'],
+    headers=['Date','Temperature (K)','Orientation (X,Y,Z)'],
 )
 
 # Create a Channel that structures the data in a way suitable for the CSVWriter.

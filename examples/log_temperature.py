@@ -4,6 +4,8 @@ in a CSV file. Note: uses the Device.pulse method, which allows for watching
 only one device at a time.
 """
 
+from _examples import *
+
 from ninja.api      import NinjaAPI
 from ninja.devices  import TemperatureSensor
 
@@ -14,10 +16,10 @@ from datetime       import datetime
 # Set up the NinjaAPI and Device wrappers:
 
 # Access token from https://a.ninja.is/you#apiTab
-api         = NinjaAPI('<YOUR_ACCESS_TOKEN>')
+api         = NinjaAPI(secrets.ACCESS_TOKEN)
 
 # Device GUID can be found using https://api.ninja.is/rest/v0/devices/?access_token=<YOUR_ACCESS_TOKEN>
-device      = TemperatureSensor(api, '<DEVICE_GUID>')
+device      = TemperatureSensor(api, secrets.TEMP_ID)
 
 
 
