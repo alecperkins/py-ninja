@@ -2,3 +2,4 @@
 .DS_Store
 secrets.py
 examples/temp_and_accel_log.csv
+examples/temp_in_celsius.csv
