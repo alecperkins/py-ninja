@@ -14,12 +14,8 @@ from datetime       import datetime
 
 
 # Set up the NinjaAPI and Device wrappers:
-
-# Access token from https://a.ninja.is/you#apiTab
-api         = NinjaAPI(secrets.ACCESS_TOKEN)
-
-# Device GUID can be found using https://api.ninja.is/rest/v0/devices/?access_token=<YOUR_ACCESS_TOKEN>
-device      = TemperatureSensor(api, secrets.TEMP_ID)
+api     = NinjaAPI(secrets.ACCESS_TOKEN)
+device  = TemperatureSensor(api, secrets.TEMP_ID)
 
 
 

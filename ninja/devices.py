@@ -38,6 +38,15 @@ class Device(Events):
         self.last_heartbeat = None
         self.last_read      = None
 
+    def __str__(self):
+        return '{class_name}("{device_name}")'.format(
+            class_name=self.__class__.__name__,
+            device_name=self.name,
+        )
+
+    def __repr__(self):
+        return str(self)
+
     def heartbeat(self, silent=False):
         data = self.api.getDeviceHeartbeat(self.guid)
         if data['id'] == 0:
@@ -146,3 +155,11 @@ class RGBLED(Device):
         self.setColor(Color.BLACK)
 
 
+TYPE_MAP = {
+    'button': Button,
+    'rgbled': RGBLED,
+    'orientation': Accelerometer,
+    'temperature': TemperatureSensor,
+    'humidity': HumiditySensor,
+    'light': LightSensor,
+}

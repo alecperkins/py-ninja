@@ -28,7 +28,6 @@ class NinjaAPI(object):
         
         self.access_token = args[0]
 
-
     def _makeGETRequest(self, url, binary=False):
 
         params = {
@@ -64,13 +63,21 @@ class NinjaAPI(object):
         else:
             raise NinjaAPIError('Got status code %s, expected 200' % (res.status_code,))
 
-
     def getDeviceHeartbeat(self, device_guid):
         return self._makeGETRequest(self.DEVICE_ROOT_URL + '/' + device_guid + '/heartbeat')
 
-
     def getDeviceURL(self, device_guid):
         return self.DEVICE_ROOT_URL + '/' + device_guid
+
+    def getDevices(self):
+        from devices import TYPE_MAP, Device
+        response = self._makeGETRequest(self.DEVICES_URL)
+        devices = []
+        for guid, device_info in response['data'].items():
+            device_class = TYPE_MAP.get(device_info.get('device_type'), Device)
+            device = device_class(self, guid, device_info)
+            devices.append(device)
+        return devices
 
 
 
@@ -89,7 +96,6 @@ class Watcher(object):
 
     def unwatch(self, device):
         self._devices.pop(device.guid)
-
 
     def start(self, period=10, duration=float('inf'), silent=False):
         self.active = True
