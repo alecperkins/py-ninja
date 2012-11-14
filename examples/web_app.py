@@ -9,13 +9,16 @@ Note: requires Flask
 from _examples import *
 
 from flask import Flask
-
 from ninja.api import NinjaAPI
 
 import json
 
+
+
 api = NinjaAPI(secrets.ACCESS_TOKEN)
 app = Flask(__name__)
+
+
 
 device_cache = {}
 
@@ -45,6 +48,7 @@ def getDevice(guid):
     else:
         device = device_cache[guid]
     return device
+
 
 
 @app.route('/')
@@ -79,6 +83,8 @@ def hello():
         """.format(device=device)
     html += '</tbody></table>'
     return html
+
+
 
 @app.route('/<guid>/')
 def showDevice(guid):
@@ -120,7 +126,8 @@ def showDevice(guid):
     """
     return html
 
-import json
+
+
 @app.route('/<guid>/heartbeat.json')
 def deviceHeartbeat(guid):
     device = getDevice(guid)
