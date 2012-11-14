@@ -19,7 +19,6 @@ class DeviceNode(Node):
 
     def emitData(self):
         if self.hasOutput():
-            d = self.device
             self.o.emit({
                 'guid'      : self.device.guid,
                 'last_read' : self.device.last_read,
@@ -41,8 +40,6 @@ class LEDNode(DeviceNode, HasInput):
 class AccelerometerNode(DeviceNode, HasOutput):
     device_class = Accelerometer
 
-    def emitData(self):
-        super(AccelerometerNode, self).emitData()
 
 
 class TemperatureNode(DeviceNode, HasOutput):

@@ -107,15 +107,40 @@ class Ticker(object):
     
     """
     def __init__(self, *args, **kwargs):
+        self.counter = 0
         self._nodes = {}
-        self._watcher = Watcher(post_cycle=self._doEmits)
+
+        self._pre_tick_fns = kwargs.get('pre_tick', [])
+        self._post_tick_fns = kwargs.get('post_tick', [])
+        if hasattr(self._pre_tick_fns, '__call__'):
+            self._pre_tick_fns = [self._pre_tick_fns]
+        if hasattr(self._post_tick_fns, '__call__'):
+            self._post_tick_fns = [self._post_tick_fns]
+
+        self._watcher = Watcher(pre_cycle=self._doPreTick, post_cycle=self._doEmits)
         for node in args:
             self.watch(node)
         return super(Ticker, self).__init__()
 
+    def addPreTick(self, *args):
+        self._pre_tick_fns += args
+
+    def addPostTick(self, *args):
+        self._post_tick_fns += args
+
+    def _doPreTick(self):
+        for fn in self._pre_tick_fns:
+            fn(self)
+
+    def _doPostTick(self):
+        for fn in self._post_tick_fns:
+            fn(self)
+
     def _doEmits(self):
         for node_id in self._nodes:
             self._nodes[node_id].emitData()
+        self.counter += 1
+        self._doPostTick()
 
     def start(self, period=10, duration=float('inf')):
         self._watcher.start(period=period, duration=duration, silent=True)

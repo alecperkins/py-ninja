@@ -1,3 +1,4 @@
 *.pyc
 .DS_Store
 secrets.py
+examples/temp_and_accel_log.csv

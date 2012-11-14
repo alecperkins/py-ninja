@@ -5,7 +5,6 @@ from .events    import Events
 from .units     import Temperature
 
 
-
 class Device(Events):
     """
     Base class for Devices.
@@ -122,7 +121,6 @@ class Accelerometer(Device):
 
 class RGBLED(Device):
     def setColor(self, color):
-        # _makePUTRequest(self, url, data):
         data = {
             'DA': color
         }

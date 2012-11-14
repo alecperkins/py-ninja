@@ -7,8 +7,7 @@ from exceptions import Exception, ValueError
 
 
 
-class NinjaAPIError(Exception):
-    pass
+class NinjaAPIError(Exception): pass
 
 
 
@@ -72,6 +71,7 @@ class NinjaAPI(object):
 
     def getDeviceURL(self, device_guid):
         return self.DEVICE_ROOT_URL + '/' + device_guid
+
 
 
 class Watcher(object):
