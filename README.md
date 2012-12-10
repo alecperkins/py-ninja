@@ -14,6 +14,25 @@ There are three major components to `py-ninja`: the core API wrapper, the device
 
 See the scripts in `examples/` for sample usage of each.
 
+### 0–60
+
+Given your access token and the device GUID of the onboard temperature sensor, display the current temperature reading, in Celsius, every 10 seconds:
+
+```python
+from ninja.api      import NinjaAPI
+from ninja.devices  import TemperatureSensor
+
+api = NinjaAPI(ACCESS_TOKEN)
+temp_sensor = TemperatureSensor(api, GUID)
+
+def printData(inst, data):
+    print inst.last_read, ':', data.c
+
+temp_sensor.onHeartbeat(printStatus)
+temp_sensor.pulse(10)
+```
+
+
 ### NinjaAPI
 
 The core is the `NinjaAPI` class, which handles the direct interaction with the Ninja Block API. `NinjaAPI` instances are initialized with an access token.
@@ -55,7 +74,11 @@ temp_sensor.onHeartbeat(printStatus)
 
 Multiple handlers can be added to a device's heartbeat event, which can be triggered by calling `device_instance.heartbeat()`. This will use the initialized NinjaAPI instance to make a GET request to that device's [heartbeat endpoint](http://docs.ninja.is/device.html#device-get-heartbeat), and then call each event handler with the device instance and the new data.
 
-To read data repetitively, device heartbeats can be 'pulsed' some number of seconds using their `.pulse` method: `temp_sensor.pulse(10)`.
+To read data repetitively, device heartbeats can be 'pulsed' some number of seconds using their `.pulse` method:
+
+```python
+temp_sensor.pulse(10)
+```
 
 The catch with the `.pulse` method is that its loop is blocking, so only one device can be pulsed at a time. 
 
