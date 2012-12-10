@@ -97,6 +97,15 @@ class Device(Events):
             time.sleep(period)
         return
 
+    def setWebhookURL(self, url):
+        return self.api.setDeviceWebhookURL(self.guid, url)
+
+    def getWebhookURL(self):
+        return self.api.getDeviceWebhookURL(self.guid)
+
+    def clearWebhookURL(self):
+        return self.api.clearDeviceWebhookURL(self.guid)
+
     # Parses the response data. Override this to handle specific sensor responses.
     # (Default is a pass-through.)
     def _parse(self, data):

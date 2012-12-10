@@ -9,11 +9,18 @@ from .devices import TYPE_MAP, Device
 
 
 
-class NinjaAPIError(Exception): pass
+class NinjaAPIError(Exception):
+    def __init__(self, *args, **kwargs):
+        if len(args) > 1:
+            self.status_code = args[1]
+        super(NinjaAPIError, self).__init__(*args, **kwargs)
 
 
 
 class NinjaAPI(object):
+    """
+    Carries authentication information
+    """
 
     API_ROOT_URL    = 'https://api.ninja.is/rest/'
     STREAM_ROOT_URL = 'https://stream.ninja.is/rest/'
@@ -50,6 +57,22 @@ class NinjaAPI(object):
         else:
             raise NinjaAPIError('Got status code %s, expected 200' % (res.status_code,))
 
+    def _makePOSTRequest(self, url, data):
+        params = {
+            'user_access_token': self.access_token,
+        }
+        res = requests.post(url, params=params, data=data)
+        if res.status_code == 200:
+            try:
+                content = json.loads(res.content)
+            except ValueError:
+                raise NinjaAPIError("Did not get a JSON object (check device id)")
+            if content['id'] != 0:
+                raise NinjaAPIError('Got status code %s, expected 200' % (content['id'],), content['id'])    
+            return content
+        else:
+            raise NinjaAPIError('Got status code %s, expected 200' % (res.status_code,), res.status_code)
+
     def _makePUTRequest(self, url, data):
         params = {
             'user_access_token': self.access_token,
@@ -65,11 +88,32 @@ class NinjaAPI(object):
         else:
             raise NinjaAPIError('Got status code %s, expected 200' % (res.status_code,))
 
+    def _makeDELETERequest(self, url):
+        params = {
+            'user_access_token': self.access_token,
+        }
+        res = requests.delete(url, params=params)   
+
+        if res.status_code == 200:
+            try:
+                content = json.loads(res.content)
+            except ValueError:
+                raise NinjaAPIError("Did not get a JSON object (check device id)")
+            return content
+        else:
+            raise NinjaAPIError('Got status code %s, expected 200' % (res.status_code,))
+
     def getDeviceHeartbeat(self, device_guid):
-        return self._makeGETRequest(self.DEVICE_ROOT_URL + '/' + device_guid + '/heartbeat')
+        return self._makeGETRequest(self.getDeviceHeartbeatURL(device_guid))
 
     def getDeviceURL(self, device_guid):
         return self.DEVICE_ROOT_URL + '/' + device_guid
+
+    def getDeviceHeartbeatURL(self, device_guid):
+        return self.getDeviceURL(device_guid) + '/heartbeat'
+
+    def getDeviceCallbackURL(self, device_guid):
+        return self.getDeviceURL(device_guid) + '/callback'
 
     def getDevices(self):
         response = self._makeGETRequest(self.DEVICES_URL)
@@ -91,6 +135,22 @@ class NinjaAPI(object):
         user_info = self._makeGETRequest(self.USER_URL)
         return User(user_info)
 
+    def setDeviceWebhookURL(self, device_guid, url):
+        callback_endpoint = self.getDeviceCallbackURL(device_guid)
+        try:
+            return self._makePOSTRequest(callback_endpoint, data={ 'url': url })
+        except NinjaAPIError as e:
+            if e.status_code == 409: # Already exists, so update it.
+                return self._makePUTRequest(callback_endpoint, data={ 'url': url })
+            else:
+                raise e
+        return
+
+    def getDeviceWebhookURL(self, device_guid):
+        return self._makeGETRequest(self.getDeviceCallbackURL(device_guid)).get('data', {}).get('url')
+
+    def clearDeviceWebhookURL(self, device_guid):
+        return self._makeDELETERequest(self.getDeviceCallbackURL(device_guid))
 
 
 class User(object):
