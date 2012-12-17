@@ -121,6 +121,7 @@ There is also a set of unit helpers, including Temperature and Color, in `ninja.
 * more thorough docs and examples
 * sample web app with oauth flow
 * tests once parts stabilize
+* simulation mode
 
 
 ## Authors
