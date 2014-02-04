@@ -28,7 +28,7 @@ temp_sensor = TemperatureSensor(api, GUID)
 def printData(inst, data):
     print inst.last_read, ':', data.c
 
-temp_sensor.onHeartbeat(printStatus)
+temp_sensor.onHeartbeat(printData)
 temp_sensor.pulse(10)
 ```
 
