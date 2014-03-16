@@ -172,6 +172,35 @@ class RGBLED(Device):
         self.setColor(Color.BLACK)
 
 
+class Relay(Device):
+    def __init__(self, *args, **kwargs):
+        super(Relay, self).__init__(*args, **kwargs)
+
+    @property
+    def state(self):
+        while self.data is None:
+            self.heartbeat()
+        return bool(int(self.data))
+
+    @state.setter
+    def state(self, value):
+        self._change_state(bool(value))
+
+    def _change_state(self, logical_state):
+        """ Changes device's logical state
+        """
+        data = {
+            'DA': str(int(logical_state))
+        }
+        self.api._makePUTRequest(self.api.getDeviceURL(self.guid), data)
+
+    def turn_on(self):
+        self._change_state(True)
+
+    def turn_off(self):
+        self._change_state(False)
+
+
 TYPE_MAP = {
     'button': Button,
     'rgbled': RGBLED,
@@ -179,4 +208,5 @@ TYPE_MAP = {
     'temperature': TemperatureSensor,
     'humidity': HumiditySensor,
     'light': LightSensor,
+    'relay': Relay,
 }
